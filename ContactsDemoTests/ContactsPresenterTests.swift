@@ -10,32 +10,38 @@ import XCTest
 
 class ContactsPresenterTests: XCTestCase {
     
-    var presenter: ContactsPresenter!
+    var presenterS: ContactsPresenter!
+    var presenterF: ContactsPresenter!
 
     override class func setUp() {
         
     }
     override func setUp() {
         super.setUp()
-        presenter = ContactsPresenter(contactsRepository: MokeContactsRepository(), callHistoryRepository: DefaultServicesFactory().getCallHistoryRepository())
+        presenterS = ContactsPresenter(contactsRepository: MokeSuccessContactsRepository(), callHistoryRepository: DefaultServicesFactory().getCallHistoryRepository())
+        presenterF = ContactsPresenter(contactsRepository: MokeFailedContactsRepository(), callHistoryRepository: MokeFailedCallHistoryRepository() )
         
     }
     func test_viewOpened() throws {
-        XCTAssertNoThrow(presenter.viewOpened())
+        XCTAssertNoThrow(presenterS.viewOpened())
+        presenterF.view = nil
+        XCTAssertNoThrow(presenterF.viewOpened())
     }
     func test_makeCall() throws {
         let contact = Contact(recordId: "0", firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
-        XCTAssertNoThrow(presenter.makeCall(to: contact))
+        XCTAssertNoThrow(presenterS.makeCall(to: contact))
+        XCTAssertNoThrow(presenterF.makeCall(to: contact))
     }
     
     func test_contactPressed() throws {
         let contact = Contact(recordId: "0", firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
-        XCTAssertNoThrow(presenter.contactPressed( contact))
+        XCTAssertNoThrow(presenterS.contactPressed( contact))
     }
     
     func test_newContactAdded() throws {
         let newContact = ContactsData(firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
-        XCTAssertNoThrow(presenter.newContactAdded(newContact))
+        XCTAssertNoThrow(presenterS.newContactAdded(newContact))
+        XCTAssertNoThrow(presenterF.newContactAdded(newContact))
     }
     
     override class func tearDown() {
@@ -49,7 +55,7 @@ class ContactsPresenterTests: XCTestCase {
     }
 }
 
-class MokeContactsRepository: ContactsRepository{
+class MokeSuccessContactsRepository: ContactsRepository{
     func getContacts() throws -> [Contact] {
         print(#function)
         return []
@@ -66,4 +72,35 @@ class MokeContactsRepository: ContactsRepository{
     func add(contact: ContactsData) throws {
         print(#function)
     }
+}
+class MokeFailedContactsRepository: ContactsRepository{
+    func delete(contact: Contact) throws {
+        print(#function)
+    }
+    
+    func update(contact: Contact) throws {
+        print(#function)
+    }
+    
+    func getContacts() throws -> [Contact] {
+        throw ContactsRepositoryErrors.getContacts
+    }
+    func add(contact: ContactsData) throws {
+        throw ContactsRepositoryErrors.add
+    }
+}
+enum ContactsRepositoryErrors: Error{
+    case getContacts
+    case add
+    case getHistory
+}
+class MokeFailedCallHistoryRepository: CallHistoryRepository {
+    func getHistory() throws -> [CallRecord] {
+        throw ContactsRepositoryErrors.getHistory
+    }
+    
+    func add(record: CallRecord) throws {
+        throw ContactsRepositoryErrors.add
+    }
+    
 }
