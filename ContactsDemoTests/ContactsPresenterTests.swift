@@ -17,21 +17,21 @@ class ContactsPresenterTests: XCTestCase {
     }
     override func setUp() {
         super.setUp()
-        let factory = DefaultServicesFactory()
-        presenter = ContactsPresenter(contactsRepository: factory.getContactsRepository(), callHistoryRepository: factory.getCallHistoryRepository())
+        presenter = ContactsPresenter(contactsRepository: MokeContactsRepository(), callHistoryRepository: DefaultServicesFactory().getCallHistoryRepository())
         
     }
     func test_viewOpened() throws {
-        
+        XCTAssertNoThrow(presenter.viewOpened())
     }
     func test_makeCall() throws {
-        let newContact = Contact(recordId: "0", firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
-        XCTAssertNoThrow(presenter.makeCall(to: newContact))
-        
-        XCTAssertMessage
+        let contact = Contact(recordId: "0", firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
+        XCTAssertNoThrow(presenter.makeCall(to: contact))
     }
     
-    
+    func test_contactPressed() throws {
+        let contact = Contact(recordId: "0", firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
+        XCTAssertNoThrow(presenter.contactPressed( contact))
+    }
     
     func test_newContactAdded() throws {
         let newContact = ContactsData(firstName: "Imya", lastName: "Familiya", phone: "PhoneNumber")
@@ -47,25 +47,23 @@ class ContactsPresenterTests: XCTestCase {
     override func addTeardownBlock(_ block: @escaping () -> Void) {
         super.addTeardownBlock(block)
     }
+}
+
+class MokeContactsRepository: ContactsRepository{
+    func getContacts() throws -> [Contact] {
+        print(#function)
+        return []
+    }
     
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    func delete(contact: Contact) throws {
+        print(#function)
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    func update(contact: Contact) throws {
+        print(#function)
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    
+    func add(contact: ContactsData) throws {
+        print(#function)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
 }
